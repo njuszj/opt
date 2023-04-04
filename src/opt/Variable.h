@@ -1,22 +1,28 @@
 # include "../include/common.h"
 
-// enum VariableType{
-//     Discrete,       // 离散
-//     Continuous,     // 连续
-//     Mixed           // 混合
-// };
 
-class VariableInfo { 
-    int n_;                                 // 变量的维度
-    // VariableType type_;                  // 变量的类型
-    vector<pair<int, int>> range_           // 变量的范围
+class VariableRange {
+public:
+    int n_;                                         // 变量的维度
+    vector<pair<double, double>> range_;            // 变量的范围
+};
+
+class IntegerVariableRange : public VariableRange {
+public:
+    int n_;                                  // 变量的维度
+    vector<pair<int, int>> range_;           // 变量的范围
 };
 
 class Variable {
-    int n_;
+public: 
+    vector<double> vals;
+};
+
+class IntegerVariable : public Variable {
 public:
     vector<int> vals;
-    int size(){
-        return n_;
-    }
-}
+};
+
+class DoubleVariable : public Variable {
+    vector<double> vals;
+};

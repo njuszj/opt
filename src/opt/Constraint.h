@@ -2,6 +2,7 @@
 #include "Variable.h"
 
 class AbstractConstraint{
+    // 所有约束条件的抽象基类
 protected:
     vector<int> factors_;
     int n_;
