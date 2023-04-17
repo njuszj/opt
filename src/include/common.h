@@ -3,6 +3,7 @@
 #include<vector>
 #include<map>
 #include<assert.h>
+#include<boost/format.hpp>
 #include"logger.h"
 
 using std::vector;

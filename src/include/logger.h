@@ -4,6 +4,7 @@
 # include <iostream>
 # include <fstream>
 # include <string>
+# include <cstdarg>
 # include <time.h>
 # include <stdio.h>
 # include <stdlib.h>

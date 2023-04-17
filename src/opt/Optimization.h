@@ -17,16 +17,18 @@ public:
 
     double evaluate(Variable<T>& x){
         double res = m_objective.calculate(x);
+        logger.INFO("Evaluate the point");
         if(res < m_min){
+            logger.INFO("The optimal point is updated.");
             m_min = res;
             m_best_pos = x;
         }
         return res;
     }
 
-    virtual Variable<T>& probe(){
-        // 探测函数，定义寻找下一个要evaluate的点的规则
-        return m_iter_var;
+    virtual bool probe(){
+        // 探测函数，修改m_iter_val, 返回是否还有下一个点
+        return false;
     }
 
     void optimize(){
@@ -46,15 +48,29 @@ public:
 };
 
 
-class EnumSearchOpt : public LinearIntegerOpt {
+class TraversalSearch : public LinearIntegerOpt {
 protected:
+    int m_idx = 0;
+    bool m_start_flag = false;
 public:
     // 针对线性整数规划问题进行枚举法暴力搜索
-    EnumSearchOpt(LinearIntegerObjective& objective, LinearIntegerConstraint& constraint, VariableRange<int>& range) : LinearIntegerOpt(objective, constraint, range){
+    TraversalSearch(LinearIntegerObjective& objective, LinearIntegerConstraint& constraint, VariableRange<int>& range) : LinearIntegerOpt(objective, constraint, range){
         m_iter_var = m_range.lower_bound();
-        
     }
-    Variable<int>& probe() override {
-        return m_iter_var;
+    bool probe() override {
+        logger.DEBUG((boost::format("Probe start at position %1%") % m_idx).str());
+        if(m_idx == m_range.size()) return false;
+        if(!m_start_flag) {
+            m_start_flag = true;
+            return true;
+        }
+        if(m_iter_var[m_idx]+1 <= m_range[m_idx].second) {
+            m_iter_var[m_idx]++;
+            return true;
+        }
+        else {
+            m_idx++;
+            return probe();
+        }
     }
 };

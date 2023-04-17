@@ -55,6 +55,7 @@ void Logger::WARNING(string text){
 }
 
 void Logger::ERROR(string text){
+
     this->output(text, error);
 }
 
