@@ -10,3 +10,6 @@ using std::cout;
 using std::cin;
 using std::pair;
 using std::move;
+using std::pair;
+
+using val_t = double;

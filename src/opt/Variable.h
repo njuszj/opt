@@ -1,28 +1,37 @@
 # include "../include/common.h"
 
 
+template<typename T>
 class VariableRange {
+    vector<T> m_upper_bound;
+    vector<T> m_lower_bound;
+    int       m_size;
 public:
-    int n_;                                         // 变量的维度
-    vector<pair<double, double>> range_;            // 变量的范围
+    VariableRange(vector<T>&& lower_bound, vector<T>&& upper_bound) {
+        if(lower_bound.size() == upper_bound.size()) {
+            m_size = m_lower_bound.size();
+            m_upper_bound = move(upper_bound);
+            m_lower_bound = move(lower_bound);
+        }
+        else {
+            logger.ERROR("The size of lower bound and upper bound don't match!");
+        }
+    }
+
+    pair<T, T> operator[](int idx){
+        return make_pair(m_lower_bound[idx], m_upper_bound[idx]);
+    }
+
+    vector<T>& lower_bound(){
+        return m_lower_bound;
+    }
+    vector<T>& upper_bound(){
+        return m_upper_bound;
+    }
+    int size() {
+        return m_size;
+    }
 };
 
-class IntegerVariableRange : public VariableRange {
-public:
-    int n_;                                  // 变量的维度
-    vector<pair<int, int>> range_;           // 变量的范围
-};
-
-class Variable {
-public: 
-    vector<double> vals;
-};
-
-class IntegerVariable : public Variable {
-public:
-    vector<int> vals;
-};
-
-class DoubleVariable : public Variable {
-    vector<double> vals;
-};
+template<typename T>
+using Variable = vector<T>;

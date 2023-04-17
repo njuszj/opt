@@ -1,27 +1,31 @@
 #include "../include/common.h"
 #include "Variable.h"
 
+template<typename T>
 class AbstractObjective{
 protected:
-    vector<int> factors_;
-    int n_;
-    double target_;
+    vector<int> m_factors;
+    int m_size;
 public:
-    virtual double calculate(Variable& x) = 0;
+    virtual double calculate(Variable<T>& x) = 0;
 };
 
-class LinearObjective : public AbstractObjective {
+class LinearIntegerObjective : public AbstractObjective<int> {
+    // 线性整数优化目标
 public:
-    LinearObjective(vector<int>&& factors){
-        factors_ = move(factors);
-        n_ = factors.size();
+    LinearIntegerObjective(vector<int>&& factors){
+        m_size = factors.size();
+        m_factors = move(factors);
     }
 
-    double calculate(Variable& x) {
-        assert(x.vals.size() == n_);
+    double calculate(Variable<int>& x) {
+        if(x.size() != m_factors.size()){
+            logger.ERROR("The size of variable and factors don't match!");
+            return 0;
+        }
         double res = 0;
-        for(int i=0; i<n_; i++){
-            res += factors_[i] * x.vals[i];
+        for(int i=0; i<m_size; i++){
+            res += m_factors[i] * x[i];
         }
         return res;
     }

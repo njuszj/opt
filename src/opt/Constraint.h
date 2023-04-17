@@ -1,30 +1,34 @@
 #include "../include/common.h"
 #include "Variable.h"
 
+
+template<typename T>
 class AbstractConstraint{
     // 所有约束条件的抽象基类
 protected:
-    vector<int> factors_;
-    int n_;
-    double target_;
+    vector<T> m_factors;
+    int m_size;
+    double m_target;
 public:
-    virtual bool check(Variable& x) = 0;
+    virtual bool check(Variable<T>& x) = 0;
 };
 
-class LinearConstraint : public AbstractConstraint {
+
+class LinearIntegerConstraint : public AbstractConstraint<int> {
+    // 线性整数约束
 public:
-    LinearConstraint(vector<int>&& factors, double target){
-        factors_ = move(factors);
-        n_ = factors.size();
-        target_ = target;
+    LinearIntegerConstraint(vector<int>&& factors, double target){
+        m_size = factors.size();
+        m_factors = move(factors);
+        m_target = target;
     }
 
-    bool check(Variable& x) {
-        assert(x.size() == n_);
+    bool check(Variable<int>& x) {
+        if(x.size() != m_size) return false;
         double res = 0;
-        for(int i=0; i<n_; i++){
-            res += factors_[i] * x.vals[i];
+        for(int i=0; i<m_size; i++){
+            res += m_factors[i] * x[i];
         }
-        return res < target_;
+        return res < m_target;
     }
 };

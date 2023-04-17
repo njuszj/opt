@@ -25,8 +25,8 @@ string currTime(){
 
 class Logger{
 public:
-    enum log_level{debug, info, warning, error};            // 日志等级
-    enum log_target{file, terminal, file_and_terminal};     // 日志输出目标
+    enum log_level{debug, info, warning, error};             // 日志等级
+    enum log_target{file, terminal, file_and_terminal};      // 日志输出目标
 private:
     std::ofstream outfile;    // 将日志输出到文件的流对象
     log_target target;        // 日志输出目标
@@ -41,5 +41,7 @@ public:
     void WARNING(string text);
     void ERROR(string text);
 };
+
+extern Logger logger;
 
 # endif
