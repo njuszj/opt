@@ -1,5 +1,7 @@
 # include "../include/common.h"
 
+template<typename T>
+using Variable = vector<T>;
 
 template<typename T>
 class VariableRange {
@@ -25,13 +27,12 @@ public:
     vector<T>& lower_bound(){
         return m_lower_bound;
     }
+
     vector<T>& upper_bound(){
         return m_upper_bound;
     }
+    
     int size() {
         return m_size;
     }
 };
-
-template<typename T>
-using Variable = vector<T>;

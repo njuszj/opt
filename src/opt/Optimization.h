@@ -36,7 +36,6 @@ public:
             evaluate(var);
         }
     }
-
     ~OptBase(){}
 };
 
@@ -46,12 +45,14 @@ public:
     LinearIntegerOpt(LinearIntegerObjective& objective, LinearIntegerConstraint& constraint, VariableRange<int>& range) : OptBase<int>(objective, constraint, range){}
 };
 
+
 class EnumSearchOpt : public LinearIntegerOpt {
 protected:
 public:
     // 针对线性整数规划问题进行枚举法暴力搜索
     EnumSearchOpt(LinearIntegerObjective& objective, LinearIntegerConstraint& constraint, VariableRange<int>& range) : LinearIntegerOpt(objective, constraint, range){
         m_iter_var = m_range.lower_bound();
+        
     }
     Variable<int>& probe() override {
         return m_iter_var;

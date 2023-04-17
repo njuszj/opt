@@ -28,10 +28,10 @@ public:
     enum log_level{debug, info, warning, error};             // 日志等级
     enum log_target{file, terminal, file_and_terminal};      // 日志输出目标
 private:
-    std::ofstream outfile;    // 将日志输出到文件的流对象
-    log_target target;        // 日志输出目标
-    string path;              // 日志文件路径
-    log_level level;          // 日志等级
+    std::ofstream outfile;      // 将日志输出到文件的流对象
+    log_target target;          // 日志输出目标
+    string path;                // 日志文件路径
+    log_level level;            // 日志等级
     void output(string text, log_level act_level);            // 输出时调用的公共函数
 public:
     Logger();  // 默认构造函数
