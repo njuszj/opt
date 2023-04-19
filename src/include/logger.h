@@ -15,14 +15,7 @@ using std::endl;
 using std::to_string;
 using std::ios;
 
-string currTime(){
-    // 获取当前时间，并规范表示
-    char tmp[64];
-    time_t ptime;
-    time(&ptime);
-    strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&ptime));
-    return string(tmp);
-}
+string currTime();
 
 class Logger{
 public:

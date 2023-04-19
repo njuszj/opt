@@ -1,45 +1,57 @@
+# ifndef OPTIMIZATION_H
+# define OPTIMIZATION_H
+
 # include "Objective.h"
 # include "Constraint.h"
 # include "Variable.h"
+# include "../include/exceptions.h"
+# include "../include/printer.h"
 
 template<typename T>
 class OptBase{
 protected:
     // 所有优化类的基类
-    VariableRange<T>& m_range;                 // 变量范围
     AbstractObjective<T>& m_objective;         // 优化目标
     AbstractConstraint<T>& m_constraint;       // 约束条件
+    VariableRange<T>& m_range;                 // 变量范围
     Variable<T> m_best_pos;                    // 最佳位置
     Variable<T> m_iter_var;                    // 迭代用变量
+    Variable<T> m_iter_upper_bound;            // 变量上界
+    Variable<T> m_iter_lower_bound;            // 变量上界
     double m_min;                              // 最佳优化值
+    bool m_has_next=true;                      // 是否有没有检查过的值
+    bool m_start_flag = false;
 public:
-    OptBase(AbstractObjective<T>& objective, AbstractConstraint<T>& constraint, VariableRange<T>& range) : m_objective(objective), m_constraint(constraint), m_range(range){}
+    OptBase(AbstractObjective<T>& objective, AbstractConstraint<T>& constraint, VariableRange<T>& range) : m_objective(objective), m_constraint(constraint), m_range(range){
+        m_iter_var         = m_range.lower_bound();
+        m_iter_upper_bound = m_range.upper_bound();
+        m_iter_lower_bound = m_range.lower_bound();
+        m_min = objective.calculate(m_iter_lower_bound);   // 预先计算最小值
+    }
 
-    double evaluate(Variable<T>& x){
-        double res = m_objective.calculate(x);
-        logger.INFO("Evaluate the point");
+    double evaluate(){
+        double res = m_objective.calculate(m_iter_var);
+        logger.INFO("Start to evaluate the point.");
+        print(m_iter_var);
         if(res < m_min){
             logger.INFO("The optimal point is updated.");
             m_min = res;
-            m_best_pos = x;
+            m_best_pos = m_iter_var;
         }
         return res;
     }
 
-    virtual bool probe(){
-        // 探测函数，修改m_iter_val, 返回是否还有下一个点
-        return false;
-    }
+    virtual bool probe() = 0;
 
     void optimize(){
-        while(1){
-            Variable<T>& var = probe();
-            if(!var) break;
-            evaluate(var);
+        while(m_has_next){
+            probe();
+            evaluate();
         }
     }
     ~OptBase(){}
 };
+
 
 class LinearIntegerOpt : public OptBase<int> {
     // 线性整数优化问题
@@ -49,28 +61,31 @@ public:
 
 
 class TraversalSearch : public LinearIntegerOpt {
-protected:
-    int m_idx = 0;
-    bool m_start_flag = false;
 public:
     // 针对线性整数规划问题进行枚举法暴力搜索
-    TraversalSearch(LinearIntegerObjective& objective, LinearIntegerConstraint& constraint, VariableRange<int>& range) : LinearIntegerOpt(objective, constraint, range){
-        m_iter_var = m_range.lower_bound();
-    }
+    TraversalSearch(LinearIntegerObjective& objective, LinearIntegerConstraint& constraint, VariableRange<int>& range) : LinearIntegerOpt(objective, constraint, range){}
+
     bool probe() override {
-        logger.DEBUG((boost::format("Probe start at position %1%") % m_idx).str());
-        if(m_idx == m_range.size()) return false;
+        if(!m_has_next) return false;
+        logger.DEBUG("Start to probe point.");
         if(!m_start_flag) {
             m_start_flag = true;
             return true;
         }
-        if(m_iter_var[m_idx]+1 <= m_range[m_idx].second) {
-            m_iter_var[m_idx]++;
-            return true;
+        bool can_find = false;
+        for(int i=0; i<m_range.size(); i++){
+            if(m_iter_var[i] < m_range.upper_bound(i)){
+                m_iter_var[i]++;
+                can_find = true;
+                break;
+            }
+            else {
+                m_iter_var[i] = m_iter_lower_bound[i];
+            }
         }
-        else {
-            m_idx++;
-            return probe();
-        }
+        if(!can_find) m_has_next = false;
+        return can_find;
     }
 };
+
+# endif

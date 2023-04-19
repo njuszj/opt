@@ -1,4 +1,5 @@
 # include "common.h"
+# include "../opt/Variable.h"
 # include <type_traits>
 
 template<typename T>
@@ -41,4 +42,13 @@ void print(map<T1, T2>& m){
         bool new_line_flag = print(ele.second);
         if(!new_line_flag) cout << endl;
     }
+}
+
+template<typename T>
+void print(Variable<T>& x) {
+    for(T& ele : x) {
+        print(ele);
+        cout << " ";
+    }
+    cout << endl;
 }

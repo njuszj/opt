@@ -1,3 +1,6 @@
+# ifndef OBJECTIVE_H
+# define OBJECTIVE_H
+
 #include "../include/common.h"
 #include "Variable.h"
 
@@ -19,7 +22,7 @@ public:
     }
 
     double calculate(Variable<int>& x) {
-        if(x.size() != m_factors.size()){
+        if(x.size() != int(m_factors.size())){
             logger.ERROR("The size of variable and factors don't match!");
             return 0;
         }
@@ -30,3 +33,5 @@ public:
         return res;
     }
 };
+
+# endif

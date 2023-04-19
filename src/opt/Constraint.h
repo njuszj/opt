@@ -1,3 +1,6 @@
+# ifndef CONSTRAINT_H
+# define CONSTRAINT_H
+
 #include "../include/common.h"
 #include "Variable.h"
 
@@ -32,3 +35,5 @@ public:
         return res < m_target;
     }
 };
+
+# endif

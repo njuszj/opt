@@ -1,5 +1,14 @@
 #include "../include/logger.h"
 
+string currTime(){
+    // 获取当前时间，并规范表示
+    char tmp[64];
+    time_t ptime;
+    time(&ptime);
+    strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&ptime));
+    return string(tmp);
+}
+
 Logger::Logger(){
     // 默认构造函数
     this->target = terminal;
