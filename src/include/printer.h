@@ -52,3 +52,13 @@ void print(Variable<T>& x) {
     }
     cout << endl;
 }
+
+template<typename T1, typename T2>
+void print(Variable<T1>& x, T2 y){
+    for(T1& ele : x) {
+        print(ele);
+        cout << " ";
+    }
+
+    cout << "-> " << y << endl;
+}

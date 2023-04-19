@@ -17,7 +17,7 @@ protected:
     Variable<T> m_best_pos;                    // 最佳位置
     Variable<T> m_iter_var;                    // 迭代用变量
     Variable<T> m_iter_upper_bound;            // 变量上界
-    Variable<T> m_iter_lower_bound;            // 变量上界
+    Variable<T> m_iter_lower_bound;            // 变量下界
     double m_min;                              // 最佳优化值
     bool m_has_next=true;                      // 是否有没有检查过的值
     bool m_start_flag = false;
@@ -32,7 +32,7 @@ public:
     double evaluate(){
         double res = m_objective.calculate(m_iter_var);
         logger.INFO("Start to evaluate the point.");
-        print(m_iter_var);
+        print(m_iter_var, res);
         if(res < m_min){
             logger.INFO("The optimal point is updated.");
             m_min = res;
@@ -44,8 +44,7 @@ public:
     virtual bool probe() = 0;
 
     void optimize(){
-        while(m_has_next){
-            probe();
+        while(probe()){
             evaluate();
         }
     }
@@ -73,14 +72,18 @@ public:
             return true;
         }
         bool can_find = false;
-        for(int i=0; i<m_range.size(); i++){
-            if(m_iter_var[i] < m_range.upper_bound(i)){
-                m_iter_var[i]++;
-                can_find = true;
-                break;
+        int pos_idx = 0;
+        while(pos_idx <= m_range.size()){
+            if(m_iter_var[pos_idx] < m_range.upper_bound(pos_idx)){
+                m_iter_var[pos_idx]++;
+                if(m_constraint.check(m_iter_var)){
+                    can_find = true;
+                    break;
+                }
             }
             else {
-                m_iter_var[i] = m_iter_lower_bound[i];
+                m_iter_var[pos_idx] = m_iter_lower_bound[pos_idx];
+                pos_idx++;
             }
         }
         if(!can_find) m_has_next = false;
