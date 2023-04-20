@@ -9,28 +9,17 @@ string currTime(){
     return string(tmp);
 }
 
-Logger::Logger(){
-    // 默认构造函数
-    this->target = terminal;
-    this->level = debug;
-    cout << "[WELCOME] " << __FILE__ << " " << currTime() << " : " << "=== Start logging ===" << endl;
+void Logger::welcome() {
+    std_out << "[WELCOME] " << currTime() << " : " << "=== Start logging ===" << endl;
 }
 
-Logger::Logger(log_target target, log_level level, string path){
-        this->target = target;
-        this->path = path;
-        this->level = level;
-        string tmp = "";  // 双引号下的常量不能直接相加，所以用一个string类型做转换
-        string welcome_dialog = tmp + "[Welcome] " + __FILE__ + " " + currTime() + " : " + "=== Start logging ===\n";
-        if (target != terminal){
-            this->outfile.open(path, ios::out | ios::app);   // 打开输出文件
-            this->outfile << welcome_dialog;
-        }
-        if (target != file){
-            // 如果日志对象不是仅文件
-            cout << welcome_dialog;
-        }
-    }
+Logger::Logger() : std_out(std::cout), err_out(std::cerr), level(debug) {
+    welcome();
+}
+
+Logger::Logger(log_level level, std::ostream& std_out, std::ostream& err_out) : std_out(std_out), err_out(err_out), level(level) {
+    welcome();
+}
 
 void Logger::output(string text, log_level act_level){
     string prefix;
@@ -39,15 +28,13 @@ void Logger::output(string text, log_level act_level){
     else if(act_level == warning) prefix = "[WARNING] ";
     else if(act_level == error) prefix = "[ERROR]   ";
     else prefix = "";
-    prefix += __FILE__;
-    prefix += " ";
-    string output_content = prefix + currTime() + " : " + text + "\n";
-    if(this->level <= act_level && this->target != file){
-        // 当前等级设定的等级才会显示在终端，且不能是只文件模式
-        cout << output_content;
+    string output_content = prefix + currTime() + " : " + text;
+    if(act_level == error){
+        err_out << output_content << endl;
     }
-    if(this->target != terminal)
-        outfile << output_content;
+    else{
+        std_out << output_content << endl;
+    }
 }
 
 

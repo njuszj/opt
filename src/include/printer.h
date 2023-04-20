@@ -1,3 +1,5 @@
+# ifndef PRINTER_H
+# define PRINTER_H
 # include "common.h"
 # include "../opt/Variable.h"
 # include <type_traits>
@@ -53,6 +55,15 @@ void print(Variable<T>& x) {
     cout << endl;
 }
 
+template<typename T>
+void print(Variable<T>&& x) {
+    for(T& ele : x) {
+        print(ele);
+        cout << " ";
+    }
+    cout << endl;
+}
+
 template<typename T1, typename T2>
 void print(Variable<T1>& x, T2 y){
     for(T1& ele : x) {
@@ -62,3 +73,5 @@ void print(Variable<T1>& x, T2 y){
 
     cout << "-> " << y << endl;
 }
+
+# endif

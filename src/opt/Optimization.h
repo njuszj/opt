@@ -27,6 +27,7 @@ public:
         m_iter_upper_bound = m_range.upper_bound();
         m_iter_lower_bound = m_range.lower_bound();
         m_min = objective.calculate(m_iter_lower_bound);   // 预先计算最小值
+        m_best_pos = m_iter_lower_bound;
     }
 
     double evaluate(){
@@ -43,11 +44,22 @@ public:
 
     virtual bool probe() = 0;
 
-    void optimize(){
-        while(probe()){
+    void optimize(int max_step=1e9){
+        int cnt = 0;
+        while(probe() && cnt < max_step){
             evaluate();
+            cnt++;
         }
+    } 
+
+    Variable<T> currBestPoint(){
+        return m_best_pos;
     }
+
+    double currBestValue(){
+        return m_min;
+    }
+
     ~OptBase(){}
 };
 
