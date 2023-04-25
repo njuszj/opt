@@ -4,6 +4,7 @@
 # include "Objective.h"
 # include "Constraint.h"
 # include "Variable.h"
+# include "Factor.h"
 # include "../include/exceptions.h"
 # include "../include/printer.h"
 
@@ -11,18 +12,18 @@ template<typename T>
 class OptBase{
 protected:
     // 所有优化类的基类
-    AbstractObjective<T>& m_objective;         // 优化目标
-    AbstractConstraint<T>& m_constraint;       // 约束条件
-    VariableRange<T>& m_range;                 // 变量范围
-    Variable<T> m_best_pos;                    // 最佳位置
-    Variable<T> m_iter_var;                    // 迭代用变量
-    Variable<T> m_iter_upper_bound;            // 变量上界
-    Variable<T> m_iter_lower_bound;            // 变量下界
-    double m_min;                              // 最佳优化值
-    bool m_has_next=true;                      // 是否有没有检查过的值
+    Objective<T>&  m_objective;                          // 优化目标
+    VariableRange<T>& m_range;                           // 变量范围
+    ConstraintVector<T>  m_constraints;                  // 约束条件
+    Variable<T> m_best_pos;                              // 最佳位置
+    Variable<T> m_iter_var;                              // 迭代用变量
+    Variable<T> m_iter_upper_bound;                      // 变量上界
+    Variable<T> m_iter_lower_bound;                      // 变量下界
+    value_t m_min;                                       // 最佳优化值
+    bool m_has_next=true;                                // 是否有没有检查过的值
     bool m_start_flag = false;
 public:
-    OptBase(AbstractObjective<T>& objective, AbstractConstraint<T>& constraint, VariableRange<T>& range) : m_objective(objective), m_constraint(constraint), m_range(range){
+    OptBase(Objective<T>& objective, VariableRange<T>& range) : m_objective(objective), m_range(range){
         m_iter_var         = m_range.lower_bound();
         m_iter_upper_bound = m_range.upper_bound();
         m_iter_lower_bound = m_range.lower_bound();
@@ -30,14 +31,15 @@ public:
         m_best_pos = m_iter_lower_bound;
     }
 
-    double evaluate(){
-        double res = m_objective.calculate(m_iter_var);
+    value_t evaluate(){
+        Variable<T>& x = m_iter_var;
+        value_t res = m_objective.calculate(x);
         logger.INFO("Start to evaluate the point.");
-        print(m_iter_var, res);
+        print(x, res);
         if(res < m_min){
             logger.INFO("The optimal point is updated.");
             m_min = res;
-            m_best_pos = m_iter_var;
+            m_best_pos = x;
         }
         return res;
     }
@@ -50,14 +52,25 @@ public:
             evaluate();
             cnt++;
         }
-    } 
+    }
+
+    bool check_valid(Variable<T>& x){
+        for(shared_ptr<Constraint<T>> iter : m_constraints){
+            if(!((iter.get())->check(x))) return false;
+        }
+        return true;
+    }
 
     Variable<T> currBestPoint(){
         return m_best_pos;
     }
 
-    double currBestValue(){
+    value_t currBestValue(){
         return m_min;
+    }
+
+    void addConstraint(shared_ptr<Constraint<T>> con) {
+        m_constraints.push_back(con);
     }
 
     ~OptBase(){}
@@ -67,14 +80,14 @@ public:
 class LinearIntegerOpt : public OptBase<int> {
     // 线性整数优化问题
 public:
-    LinearIntegerOpt(LinearIntegerObjective& objective, LinearIntegerConstraint& constraint, VariableRange<int>& range) : OptBase<int>(objective, constraint, range){}
+    LinearIntegerOpt(LinearIntegerObjective& objective, VariableRange<int>& range) : OptBase<int>(objective, range){}
 };
 
 
 class TraversalSearch : public LinearIntegerOpt {
 public:
     // 针对线性整数规划问题进行枚举法暴力搜索
-    TraversalSearch(LinearIntegerObjective& objective, LinearIntegerConstraint& constraint, VariableRange<int>& range) : LinearIntegerOpt(objective, constraint, range){}
+    TraversalSearch(LinearIntegerObjective& objective, VariableRange<int>& range) : LinearIntegerOpt(objective, range){}
 
     bool probe() override {
         if(!m_has_next) return false;
@@ -84,18 +97,28 @@ public:
             return true;
         }
         bool can_find = false;
-        int pos_idx = 0;
-        while(pos_idx <= m_range.size()){
-            if(m_iter_var[pos_idx] < m_range.upper_bound(pos_idx)){
-                m_iter_var[pos_idx]++;
-                if(m_constraint.check(m_iter_var)){
+        while(1){
+            if(m_iter_var[0] < m_range.upper_bound_at(0)){
+                m_iter_var[0]++;
+                if (check_valid(m_iter_var)) {
                     can_find = true;
                     break;
                 }
             }
             else {
-                m_iter_var[pos_idx] = m_iter_lower_bound[pos_idx];
-                pos_idx++;
+                m_iter_var[0] = m_range.lower_bound_at(0);
+                int pos_idx = 0;
+                for(int i=1; i<m_range.size(); i++){
+                    if(m_iter_var[i] == m_range.upper_bound_at(i)) {
+                        m_iter_var[i] = m_range.lower_bound_at(i);
+                    }
+                    else {
+                        m_iter_var[i]++;
+                        pos_idx = i;
+                        break;
+                    }
+                }
+                if(!pos_idx) break;
             }
         }
         if(!can_find) m_has_next = false;

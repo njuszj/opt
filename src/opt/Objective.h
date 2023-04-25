@@ -3,30 +3,31 @@
 
 #include "../include/common.h"
 #include "Variable.h"
+#include "Factor.h"
 
 template<typename T>
-class AbstractObjective{
+class Objective{
 protected:
-    vector<int> m_factors;
+    Factor m_factors;
     int m_size;
 public:
-    virtual double calculate(Variable<T>& x) = 0;
+    virtual value_t calculate(Variable<T>& x) {return 0;};
 };
 
-class LinearIntegerObjective : public AbstractObjective<int> {
+class LinearIntegerObjective : public Objective<int> {
     // 线性整数优化目标
 public:
-    LinearIntegerObjective(vector<int>&& factors){
+    LinearIntegerObjective(Factor&& factors){
         m_size = factors.size();
         m_factors = move(factors);
     }
 
-    double calculate(Variable<int>& x) {
+    value_t calculate(Variable<int>& x) {
         if(x.size() != int(m_factors.size())){
             logger.ERROR("The size of variable and factors don't match!");
             return 0;
         }
-        double res = 0;
+        value_t res = 0;
         for(int i=0; i<m_size; i++){
             res += m_factors[i] * x[i];
         }

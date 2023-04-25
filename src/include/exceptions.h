@@ -7,15 +7,19 @@
 using std::string;
 using std::exception;
 
-class LengthNoMatch : public exception {
-    string message;
-public:
-    LengthNoMatch() : message("The Length of two element does not match!") {}
-    LengthNoMatch(string& msg) : message(msg) {}
-    ~LengthNoMatch() throw() {}
-    const char* what() const throw() override {
-        return message.c_str();
-    }
-};
+namespace opt {
+    class LengthNoMatch : public exception {
+        string message;
+    public:
+        LengthNoMatch() : message("The Length of two element does not match!") {}
+        LengthNoMatch(string& msg) : message(msg) {}
+        ~LengthNoMatch() throw() {}
+        const char* what() const throw() override {
+            return message.c_str();
+        }
+    };
+}
+
+using namespace opt;
 
 # endif

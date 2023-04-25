@@ -32,6 +32,7 @@ public:
     void INFO(string text);
     void WARNING(string text);
     void ERROR(string text);
+    void setLogLevel(log_level level);
 };
 
 extern Logger logger;

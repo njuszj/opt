@@ -55,4 +55,8 @@ void Logger::ERROR(string text){
     this->output(text, error);
 }
 
+void Logger::setLogLevel(log_level level){
+    this->level = level;
+}
+
 Logger logger;

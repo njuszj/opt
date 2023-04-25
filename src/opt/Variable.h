@@ -69,11 +69,11 @@ public:
         return m_upper_bound;
     }
 
-    T upper_bound(int idx) const {
+    T upper_bound_at(int idx) const {
         return m_upper_bound[idx];
     }
 
-    T lower_bound(int idx) const {
+    T lower_bound_at(int idx) const {
         return m_lower_bound[idx];
     }
 
